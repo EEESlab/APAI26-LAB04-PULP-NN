@@ -48,17 +48,17 @@ void fill_matrix(int * Mat, int height, int width, int val){
 }
 
 void checksum(int * MatA, int a_val, int b_val, int NN, int MM, int KK){
-  printf("\n\n**************************************************************\n\n");
+  printf("\n**************************************************************\n");
   for (int i=0; i<NN*MM; i++){
     if (MatA[i]!=a_val*b_val*KK){
-        printf("ERROR - CHECKSUM WRONG! \n");
+        printf("ERROR - CHECKSUM WRONG!\n");
         break;
     }
     if (i==NN*MM-1){
       printf("CHECKSUM CORRECT!\n");
     }
   }
-  printf("\n**************************************************************\n\n");
+  printf("**************************************************************\n");
 }
 
 
@@ -110,10 +110,6 @@ void cluster_fn() {
       // PUT YOUR CODE HERE (add load stall)
   );
 
-  //pi_perf_stop();
-  //pi_perf_reset();
-  //pi_perf_start(); // start the performance counters
-
   /* TASK 1.1: Speed-up and Amdhal's law
    *
    * Profile the execution of the matrix multiplication kernel. 
@@ -143,26 +139,32 @@ void cluster_fn() {
    * Take away message: You can speed up only the parallel code!!
    * 
    */
+
+  // pi_perf_stop();
+  // pi_perf_reset();
+  // pi_perf_start();  // start the performance counters
+
   // task to profile
   gemm(A, B, C, N, M, K); 
-  //gemm_unroll(A, B, C, N, M, K);
-  //gemm_reuse(A, B, C, N, M, K);
+  // gemm_unroll(A, B, C, N, M, K);
+  // gemm_reuse(A, B, C, N, M, K);
 
-  //pi_perf_stop(); // stop the performance counters
+  // pi_perf_stop();   // stop the performance counters
 
   // core 1, ... , NUM_CORES do not execute the if-statement body..
   // comment it to see the results from all the cores
   if (pi_core_id()==0) {
-
     cycles_cnt = pi_perf_read(PI_PERF_CYCLES);
-    //instr_cnt = pi_perf_read(PI_PERF_INSTR);
+    // instr_cnt = pi_perf_read(PI_PERF_INSTR);
 	  // float ipc = (float) instr_cnt / (float) cycles_cnt;
     // /*YOUR CODE HERE*/ // (read the ld stalls counter)
 
-    printf("coreID [%d]: Clock Cycles: %d | %d cores execution\n",
+    printf("\ncoreID [%d]: Clock Cycles: %d | %d cores execution\n",
         pi_core_id(), cycles_cnt, NUM_CORES);
-    printf("coreID [%d]: Number of Instructions: %-6d\tClock Cycles: %d\tIPC= %.2f | %d cores execution\n",
-        pi_core_id(), instr_cnt, cycles_cnt, ipc, NUM_CORES);
+
+    // printf("coreID [%d]: Number of Instructions: %-6d\tClock Cycles: %d\tIPC= %.2f | %d cores execution\n",
+    //     pi_core_id(), instr_cnt, cycles_cnt, ipc, NUM_CORES);
+
     // (print the ld stalls counter)
     // printf("coreID [%d]: Stalls: %d, instructions %d, cycles %d, IPC %.2f| %d cores execution\n",
     //     pi_core_id(), /*YOUR CODE HERE*/, instr_cnt, cycles_cnt, ipc, NUM_CORES);    
