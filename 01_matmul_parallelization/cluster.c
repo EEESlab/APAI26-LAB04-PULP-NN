@@ -106,7 +106,11 @@ void cluster_fn() {
    */
   pi_perf_conf(
       1 << PI_PERF_CYCLES
+
+      // TASK 1.2 - Remember to activate the instructions counter!
       // | 1 << PI_PERF_INSTR
+
+      // TASK 1.3 - Remember to add and activate the load stalls counter!
       // PUT YOUR CODE HERE (add load stall)
   );
 
@@ -149,19 +153,24 @@ void cluster_fn() {
   // gemm_unroll(A, B, C, N, M, K);
   // gemm_reuse(A, B, C, N, M, K);
 
+  // Task 1.1 - Remember to stop the perf counters!
   // pi_perf_stop();   // stop the performance counters
 
   // core 1, ... , NUM_CORES do not execute the if-statement body..
   // comment it to see the results from all the cores
   if (pi_core_id()==0) {
     cycles_cnt = pi_perf_read(PI_PERF_CYCLES);
+
+    // Task 1.2 - Remember to read the instructions counter!
     // instr_cnt = pi_perf_read(PI_PERF_INSTR);
 	  // float ipc = (float) instr_cnt / (float) cycles_cnt;
+
     // /*YOUR CODE HERE*/ // (read the ld stalls counter)
 
     printf("\ncoreID [%d]: Clock Cycles: %d | %d cores execution\n",
         pi_core_id(), cycles_cnt, NUM_CORES);
 
+    // Task 1.2 - Remember to print the instructions counter!
     // printf("coreID [%d]: Number of Instructions: %-6d\tClock Cycles: %d\tIPC= %.2f | %d cores execution\n",
     //     pi_core_id(), instr_cnt, cycles_cnt, ipc, NUM_CORES);
 

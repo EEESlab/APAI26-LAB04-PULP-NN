@@ -24,6 +24,8 @@ void gemm(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
     pi_cl_team_barrier();
 
 }
+
+
 /* TASK 1.3: Loop unrolling technique
  *
  * Does the scheduling of the instructions avoid the stalls?
@@ -90,6 +92,7 @@ void gemm_unroll(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
   // for (int i = i_start; i < i_end; i ++) {
   //   for (int j = 0; j < MM; j++) {
   //     int acc = 0;
+  //
   //     for (int k = 0; k < KK; /*YOUR CORE HERE*/) {
   //       // memory insns
   //       int A0  = MatA[i*KK+(k+0)];
@@ -108,6 +111,7 @@ void gemm_unroll(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
   //       int A13 = MatA[i*KK+(k+13)];
   //       int A14 = MatA[i*KK+(k+14)];
   //       int A15 = MatA[i*KK+(k+15)];
+  // 
   //       int B0  = MatB[(k+0)*MM+j];
   //       int B1  = MatB[(k+1)*MM+j];
   //       int B2  = MatB[(k+2)*MM+j];
@@ -146,50 +150,8 @@ void gemm_unroll(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
   //       acc += A14 * B14;
   //       acc += A15 * B15;
   //     } //k
+  // 
   //     MatC[i*MM+j] = acc;
-  //   }//j
-  // }//i
-
-  // pi_cl_team_barrier();
-
-}
-
-void gemm_reuse(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
-
-  // int core_id = pi_core_id();
-  // int i_chunk = (NN + NUM_CORES-1) / NUM_CORES;
-  // int i_start = core_id * i_chunk;
-  // int i_end   = i_start + i_chunk < NN ? i_start + i_chunk : NN;
-
-  // for (int i = i_start; i < i_end; i ++) {
-  //   for (int j = 0; j < MM; PUT YOUR CODE HERE) {
-  //     int acc0 = 0;
-  //     int acc1 = 0;
-  //     int acc2 = 0;
-  //     int acc3 = 0;
-  //     int acc4 = 0;
-  //     int acc5 = 0;
-  //     int acc6 = 0;
-  //     int acc7 = 0;
-  //     for (int k = 0; k < KK; k++) {
-  //       int shared_op = MatA[i*KK+k];
-  //       acc0 += shared_op * MatB[k*MM+(j+0)];
-  //       acc1 += shared_op * MatB[k*MM+(j+1)];
-  //       acc2 += shared_op * MatB[k*MM+(j+2)];
-  //       acc3 += shared_op * MatB[k*MM+(j+3)];
-  //       acc4 += shared_op * MatB[k*MM+(j+4)];
-  //       acc5 += shared_op * MatB[k*MM+(j+5)];
-  //       acc6 += shared_op * MatB[k*MM+(j+6)];
-  //       acc7 += shared_op * MatB[k*MM+(j+7)];
-  //     } //k
-  //     MatC[i*MM+(j+0)] = acc0;
-  //     MatC[i*MM+(j+1)] = acc1;
-  //     MatC[i*MM+(j+2)] = acc2;
-  //     MatC[i*MM+(j+3)] = acc3;
-  //     MatC[i*MM+(j+4)] = acc4;
-  //     MatC[i*MM+(j+5)] = acc5;
-  //     MatC[i*MM+(j+6)] = acc6;
-  //     MatC[i*MM+(j+7)] = acc7;
   //   }//j
   // }//i
 
