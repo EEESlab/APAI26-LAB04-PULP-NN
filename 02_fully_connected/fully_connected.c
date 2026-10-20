@@ -89,6 +89,7 @@ void fully_connected(const fc_args_t args) {
     // Pointer to the weight row corresponding to the processed output channel
     int8_t *weights_row = args.weights + (i * args.channels_in);
     
+    // Task 2.1 - Change here between regular and simd dot-product implementation
     // Calculate the channel output at index i by doing a dot product between the input and the weight row
     args.output[i] = dotp_u8_i8_i32(args.input, weights_row, args.channels_in);
   }
