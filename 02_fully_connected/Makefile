@@ -7,10 +7,6 @@ APP_SRCS = main.c fully_connected.c
 # NUMBER OF USED CLUSTER CORES
 CORES ?= 1
 
-# MEASURE PERFORMANCE ON ALL CORES
-# Uncomment the line below to measure performance on all cores.
-#APP_CFLAGS += -DPER_CORE_PERF
-
 # LAYER DIMENSIONS
 # Default values in include/data_allocation.h, override with:
 # make clean all run CH_IN=<value> CH_OUT=<value>

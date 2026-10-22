@@ -48,7 +48,11 @@ void gemm(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
  * 1.3.2: Implement loop unrolling with factor of 2, 4, 8, 16 and
  * fill the table with the overall MACs/cycle for 8 cores execution.
  * Do you see a regression doing more aggressive loop unrolling? Why?
- * The problem is that implenting unrolling, you are forcing multiple
+ * Look at the stalls, but also at the instructions and the cycles: fewer
+ * stalls do not always mean fewer cycles. With K=16, the unrolled inner
+ * loop runs only a few iterations (2 with factor 8), so the setup code
+ * around it weighs more and more on the total.
+ * Another problem is that implementing unrolling, you are forcing multiple
  * loads from the memory, loading the values in the internal core
  * registers. They are not infinite, especially in embedded architecture
  * such as PULP. The available registers in the register file

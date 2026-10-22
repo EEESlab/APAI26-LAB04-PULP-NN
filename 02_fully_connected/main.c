@@ -53,38 +53,29 @@ static void generate_data_and_reference() {
 void cluster_fn(void *args) {
   const int core_id = pi_core_id();
 
-  #ifndef PER_CORE_PERF
   if (core_id == 0) {
-  #endif
     // Setup and start performance counters
-    pi_perf_conf(1<<PI_PERF_CYCLES | 1<<PI_PERF_INSTR);          
-    pi_perf_reset();                      
-    pi_perf_stop();                       
+    pi_perf_conf(1<<PI_PERF_CYCLES | 1<<PI_PERF_INSTR);
+    pi_perf_reset();
+    pi_perf_stop();
     pi_perf_start();
-  #ifndef PER_CORE_PERF
   }
-  #endif
 
-  // Task 2.4 - Change here between output and input channels parallelization
   fully_connected(*(fc_args_t *)args);
 
-  #ifndef PER_CORE_PERF
   // Wait for all cores, so that core 0 measures the latency of the whole layer
   pi_cl_team_barrier();
 
   if (core_id == 0) {
-  #endif
     // Stop performance counters and print out the performance
-    pi_perf_stop();          
+    pi_perf_stop();
 
     int perf_cyc =  pi_perf_read(PI_PERF_CYCLES);
     int perf_ins =  pi_perf_read(PI_PERF_INSTR);
 
     printf("[CORE %d] FullyConnected layer performance: #cycles: %d, #inst: %d\n\n",
           core_id, perf_cyc, perf_ins);
-  #ifndef PER_CORE_PERF
   }
-  #endif
 }
 
 void cluster_entry() {
@@ -95,7 +86,6 @@ void cluster_entry() {
     .input = IN_INT8_L1,
     .weights = WEIGHT_INT8_L1,
     .output = OUT_L1,
-    .partial = PARTIAL_L1,
     .channels_in = CH_IM_IN,
     .channels_out = CH_IM_OUT
   };

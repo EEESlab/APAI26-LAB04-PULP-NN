@@ -35,7 +35,6 @@
 PI_L1 uint8_t IN_INT8_L1[CH_IM_IN] __attribute__((aligned(4)));
 PI_L1 int8_t WEIGHT_INT8_L1[(CH_IM_IN * CH_IM_OUT)] __attribute__((aligned(4)));
 PI_L1 int32_t OUT_L1[CH_IM_OUT];
-PI_L1 int32_t PARTIAL_L1[NUM_CORES * CH_IM_OUT];
 PI_L2 int32_t OUT_REF_L2[CH_IM_OUT];
 
 

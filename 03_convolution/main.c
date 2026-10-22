@@ -43,16 +43,6 @@ extern uint32_t matmul_cycles[NUM_CORES];
 void convolution(void *args) {
   conv_args_t conv_args = *(conv_args_t *)args;
 
-#ifdef PROFILE_SPLIT
-  // Core 0 counters are already running (started in cluster_entry),
-  // start the ones of the other cores
-  if (pi_core_id() != 0) {
-    pi_perf_conf(1<<PI_PERF_CYCLES);
-    pi_perf_reset();
-    pi_perf_start();
-  }
-#endif
-
   pulp_nn_conv_u8_u8_i8(
       conv_args.input,
       conv_args.im2col,

@@ -72,6 +72,9 @@ void cluster_fn() {
   fill_matrix(B, K, M, mat_b_val);
   fill_matrix(C, N, M, 0);
 
+  // wait for all cores to finish the init before computing
+  pi_cl_team_barrier();
+
   // define other variables
   uint32_t cycles_cnt,instr_cnt,ld_stall_cnt;
 

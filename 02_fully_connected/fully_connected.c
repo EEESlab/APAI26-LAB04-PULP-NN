@@ -98,39 +98,3 @@ void fully_connected(const fc_args_t args) {
     args.output[i] = dotp_u8_i8_i32(args.input, weights_row, args.channels_in);
   }
 }
-
-
-/* TASK 2.4 (OPTIONAL): Parallelize over the input channels
- *
- * fully_connected() splits the output channels among the cores.
- * With CH_OUT=12 and 8 cores, how many output channels does each
- * core get? How many cores are idle? In general, when the layer has
- * fewer output channels than cores, some cores have nothing to do.
- *
- * Here, instead, every core computes ALL the output channels, but only
- * over its own chunk of the input channels. Every core produces
- * a partial sum for each output channel, and these partial sums must
- * then be added together (reduction) to get the final output.
- *
- * args.partial is a buffer of NUM_CORES * channels_out partial sums.
- *
- * To use this function, change the call in main.c.
- */
-void fully_connected_split_in(const fc_args_t args) {
-  const int core_id = pi_core_id();
-
-  // Step 1: compute the begin and end of this core's chunk of input channels.
-  //         Hint: keep begin a multiple of 4, so the SIMD loads stay aligned.
-  /* YOUR CODE HERE */
-
-  // Step 2: for each output channel i, compute the partial dot-product over
-  //         this core's chunk and store it in args.partial[core_id * args.channels_out + i]
-  /* YOUR CODE HERE */
-
-  // Step 3: before the reduction, make sure all cores have written their partial sums
-  /* YOUR CODE HERE */
-
-  // Step 4: add the partial sums of all the cores into args.output.
-  //         Which cores should do it? Can the reduction be parallelized too?
-  /* YOUR CODE HERE */
-}
