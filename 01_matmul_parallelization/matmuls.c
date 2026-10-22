@@ -75,7 +75,7 @@ void gemm_unroll(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
   //   for (int j = 0; j < MM; j++) {
   //     int acc = 0;
   //
-  //     for (int k = 0; k < KK; /*YOUR CORE HERE*/) {
+  //     for (int k = 0; k < KK; /*YOUR CODE HERE*/) {
   //       // memory insns
   //       int A0  = MatA[i*KK+(k+0)];
   //       int A1  = MatA[i*KK+(k+1)];

@@ -1,6 +1,6 @@
 #include "pmsis.h"
 
-/* TASK 1.2: Parallelizazion technique with 8 cores
+/* TASK 1.2: Parallelization technique with 8 cores
  *
  * Change the size of the rows of matrix A and see what happens.
  * To parallelize the task, you need to create small chunks to
@@ -9,8 +9,8 @@
  * involved.
  * 
  * 1.2.1: Fill the table with the MACs/cycle with 8 cores execution varying
- * the the row size with 4 and 8. Is the parallelization good enough?
- * Amdhal's law can help you answer.
+ * the row size with 4 and 8. Is the parallelization good enough?
+ * Amdahl's law can help you answer.
  * What about if you set 80 and 81? What do you expect? Fill the table.
  * 
  * 1.2.2: The IPC (instruction per cycle) is a good metric to see the
@@ -117,20 +117,20 @@ void cluster_fn() {
       // PUT YOUR CODE HERE (add load stall)
   );
 
-  /* TASK 1.1: Speed-up and Amdhal's law
+  /* TASK 1.1: Speed-up and Amdahl's law
    *
    * Profile the execution of the matrix multiplication kernel. 
    * The speed-up represents the gain you are getting by splitting
    * the workload among multiple processing units with respect
    * to execute it sequentially.
    * The maximum achievable speed-up can be calculated with
-   * the Amdhal's law and, at the first order, it is equal
+   * the Amdahl's law and, at the first order, it is equal
    * to the available number of cores.
    * 
    * 1.1.1: Fill the table with the total execution cycles varying the
    * number of cores with 2, 4, and 8 and compute the speed-up
    * for each iteration. Is it equal to the maximum achievable?
-   * Why? The Amdhal's law tells you that:
+   * Why? The Amdahl's law tells you that:
    * 
    *                  1
    * SU(N) = -------------------, p <= 1, N = available cores
@@ -138,7 +138,7 @@ void cluster_fn() {
    *            (1 - p) + ---
    *                       N
    * where
-   *  - p is the part of the code that ca be parallelized
+   *  - p is the part of the code that can be parallelized
    *  - 1-p is the part of the code that can not be parallelized
    *  - N is the number of cores
    *  - S is the speedup
