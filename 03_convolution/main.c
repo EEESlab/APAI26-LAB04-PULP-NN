@@ -35,8 +35,23 @@ typedef struct {
   int8_t  *bias;
 } conv_args_t;
 
+#ifdef PROFILE_SPLIT
+extern uint32_t im2col_cycles[NUM_CORES];
+extern uint32_t matmul_cycles[NUM_CORES];
+#endif
+
 void convolution(void *args) {
   conv_args_t conv_args = *(conv_args_t *)args;
+
+#ifdef PROFILE_SPLIT
+  // Core 0 counters are already running (started in cluster_entry),
+  // start the ones of the other cores
+  if (pi_core_id() != 0) {
+    pi_perf_conf(1<<PI_PERF_CYCLES);
+    pi_perf_reset();
+    pi_perf_start();
+  }
+#endif
 
   pulp_nn_conv_u8_u8_i8(
       conv_args.input,
@@ -93,13 +108,19 @@ void cluster_entry() {
   int perf_cyc =  pi_perf_read(PI_PERF_CYCLES);
 
   printf("Convolution layer completed, running on %d cores\n", NUM_CORES);
-  printf(" - num_cycles: %d\n", perf_cyc); 
+  printf(" - num_cycles: %d\n", perf_cyc);
+
+#ifdef PROFILE_SPLIT
+  for (int i = 0; i < NUM_CORES; i++)
+    printf(" - [CORE %d] im2col cycles: %d, matmul cycles: %d\n",
+          i, im2col_cycles[i], matmul_cycles[i]);
+#endif
 
   int errors = 0;
   for (int i = 0; i < (DIM_IM_OUT_X * DIM_IM_OUT_Y * CH_IM_OUT); i++)
     if(OUT_L1[i] != OUT_INT8_L2[i])
     {
-      printf("Error at index %d: got %d instead of %d\n", i, OUT_L2[i], OUT_INT8_L2[i]);
+      printf("Error at index %d: got %d instead of %d\n", i, OUT_L1[i], OUT_INT8_L2[i]);
       errors++;
     }
 

@@ -151,7 +151,6 @@ void cluster_fn() {
   // task to profile
   gemm(A, B, C, N, M, K); 
   // gemm_unroll(A, B, C, N, M, K);
-  // gemm_reuse(A, B, C, N, M, K);
 
   // Task 1.1 - Remember to stop the perf counters!
   // pi_perf_stop();   // stop the performance counters

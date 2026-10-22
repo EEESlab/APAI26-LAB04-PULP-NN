@@ -22,9 +22,32 @@
 #include "pmsis.h"
 #include "fully_connected.h"
 
-// data allocation and golden models
-#include "golden.h"
+// data allocation
 #include "data_allocation.h"
+
+
+// Fill the inputs and weights with pseudo-random values and compute the
+// reference output with a plain dot-product, independent from fully_connected.c
+static void generate_data_and_reference() {
+  uint32_t seed = 42;
+
+  for (int i = 0; i < CH_IM_IN; i++) {
+    seed = seed * 1103515245 + 12345;
+    IN_INT8_L1[i] = (uint8_t)(seed >> 24);
+  }
+
+  for (int i = 0; i < CH_IM_IN * CH_IM_OUT; i++) {
+    seed = seed * 1103515245 + 12345;
+    WEIGHT_INT8_L1[i] = (int8_t)(seed >> 24);
+  }
+
+  for (int i = 0; i < CH_IM_OUT; i++) {
+    int32_t sum = 0;
+    for (int j = 0; j < CH_IM_IN; j++)
+      sum += IN_INT8_L1[j] * WEIGHT_INT8_L1[i * CH_IM_IN + j];
+    OUT_REF_L2[i] = sum;
+  }
+}
 
 
 void cluster_fn(void *args) {
@@ -42,9 +65,13 @@ void cluster_fn(void *args) {
   }
   #endif
 
+  // Task 2.4 - Change here between output and input channels parallelization
   fully_connected(*(fc_args_t *)args);
 
   #ifndef PER_CORE_PERF
+  // Wait for all cores, so that core 0 measures the latency of the whole layer
+  pi_cl_team_barrier();
+
   if (core_id == 0) {
   #endif
     // Stop performance counters and print out the performance
@@ -61,23 +88,19 @@ void cluster_fn(void *args) {
 }
 
 void cluster_entry() {
-  // Copy inputs and weights from L2 to L1
-  for(int i=0; i<(CH_IM_IN); i++)
-    IN_INT8_L1[i] = IN_INT8_L2[i];
-
-  for(int i=0; i<(CH_IM_IN * CH_IM_OUT); i++)
-    WEIGHT_INT8_L1[i] = WEIGHT_INT8_L2[i];
+  generate_data_and_reference();
 
   // Arguments for the `cluster_fn` function
   fc_args_t fc_args = {
     .input = IN_INT8_L1,
     .weights = WEIGHT_INT8_L1,
     .output = OUT_L1,
+    .partial = PARTIAL_L1,
     .channels_in = CH_IM_IN,
     .channels_out = CH_IM_OUT
   };
 
-  printf("\n\nRunning the FullyConnected layer\n");
+  printf("\n\nRunning the FullyConnected layer (CH_IN=%d, CH_OUT=%d)\n", CH_IM_IN, CH_IM_OUT);
 
   // Execute function `cluster_fn` over NUM_CORES cores
   pi_cl_team_fork(NUM_CORES, (void *)cluster_fn, (void *)&fc_args);
@@ -85,8 +108,8 @@ void cluster_entry() {
   // Check results
   int errors = 0;
   for (int i = 0; i < CH_IM_OUT; i++)
-    if(OUT_L1[i] != OUT_L2[i]) {
-      printf("Error at index %d: got %d instead of %d", i, OUT_L1[i], OUT_L2[i]);
+    if(OUT_L1[i] != OUT_REF_L2[i]) {
+      printf("Error at index %d: got %d instead of %d\n", i, OUT_L1[i], OUT_REF_L2[i]);
       errors++;
     }
 

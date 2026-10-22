@@ -22,6 +22,24 @@
 #include "pulp_nn_kernels.h"
 
 
+#ifdef PROFILE_SPLIT
+// Cycles spent by each core in the im2col and in the matmul
+PI_L1 uint32_t im2col_cycles[NUM_CORES];
+PI_L1 uint32_t matmul_cycles[NUM_CORES];
+
+// Add the cycles elapsed since the previous mark to acc[core_id]
+#define PROF_INIT()    uint32_t prof_t = pi_perf_read(PI_PERF_CYCLES); \
+                       im2col_cycles[core_id] = 0; matmul_cycles[core_id] = 0
+#define PROF_RESET()   prof_t = pi_perf_read(PI_PERF_CYCLES)
+#define PROF_MARK(acc) do { uint32_t t = pi_perf_read(PI_PERF_CYCLES); \
+                            acc[core_id] += t - prof_t; prof_t = t; } while (0)
+#else
+#define PROF_INIT()
+#define PROF_RESET()
+#define PROF_MARK(acc)
+#endif
+
+
 void pulp_nn_conv_u8_u8_i8(
                         uint8_t *pIn,
                         uint8_t *pIm2ColBuffer,
@@ -87,6 +105,8 @@ void pulp_nn_conv_u8_u8_i8(
   uint8_t *pIm2Col = pIm2ColBase;
   uint8_t *pOutBuffer = pOut + (start_pixel * ch_out_r * dim_out_x) + (section * ch_out_r * dim_out_x_r);
 
+  PROF_INIT();
+
   // iterate over all the output pixels
   for (i_out_y = start_pixel; i_out_y < stop_pixel; i_out_y++)
   {
@@ -94,6 +114,8 @@ void pulp_nn_conv_u8_u8_i8(
     //im2col
     for(i_out_x=(section * dim_out_x_r); i_out_x<(dim_out_x_r + (section * (dim_out_x_r + flag_dim_out_x_odd))); i_out_x++)
     {
+      PROF_RESET();
+
       if(i_out_y < padding_y_top) //check if at the top border
       {
         for(i_ker_y=((i_out_y * stride_y) - padding_y_top); i_ker_y<((i_out_y * stride_y) - padding_y_top + dim_kernel_y); i_ker_y++)
@@ -178,6 +200,8 @@ void pulp_nn_conv_u8_u8_i8(
         }
       }
 
+      PROF_MARK(im2col_cycles);
+
       // if im2col buffer is filled, apply matmul!
       if(pIm2Col == (pIm2ColBase + ((ch_in * dim_kernel_x * dim_kernel_y) << 1)))
       {
@@ -194,11 +218,15 @@ void pulp_nn_conv_u8_u8_i8(
 
         pIm2Col = pIm2ColBase;
       }
+
+      PROF_MARK(matmul_cycles);
     }
 
     // check if some im2col are left and compute!
     if(pIm2Col != pIm2ColBase)
     {
+      PROF_RESET();
+
       const int8_t *pA = pWeight;
       for(int i = 0; i < ch_out; i++)
       {
@@ -232,8 +260,10 @@ void pulp_nn_conv_u8_u8_i8(
         // compress to 8 bit
         *pOutBuffer = (uint8_t) clip8(sum >> out_shift);
         pOutBuffer++;
-        
+
       }
+
+      PROF_MARK(matmul_cycles);
     }
     pOutBuffer+=(extra_chunk * ((dim_out_x_r + ((1 - section) * flag_dim_out_x_odd)) * ch_out_r));
     pIm2Col = pIm2ColBase;

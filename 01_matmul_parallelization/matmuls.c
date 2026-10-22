@@ -59,28 +59,6 @@ void gemm(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
  * to and from the stack (memory) the values on the registers to reuse
  * the register for another operand. This effect would destroy all the
  * performance metrics.
- *
- * BONUS TASK 1.4: Is there a smarter way to compute it? If you look deeper
- * into the kernel implemetation you should see that the index of matrix A
- * depends on i and k, which are the outermost and the innermost loop indexes
- * respectively, while the one of matrix B depends on the j and k. This means
- * that this operation exposes a kind of reuse of the matrix A to compute different
- * output. The reuse in general increases the performance and especially the
- * OPEF (operation efficiency). This metric tells us the ratio between the
- * "useful" operations with respect the total amount of executed instructions.
- * The higher is the OPEF the higher is the efficiency of the code.
- * Therefore, in our case the OPEF is the following:
- *
- *                                 NB_MACS
- *                  OPEF = -----------------------
- *                             NB_INSTRUCTIONS
- *
- * To calculate it you just have to consider the number of MACs in the
- * innermost loop with respect to the total amount of instructions (loads
- * + macs).
- * Fill the table with the OPEF for 8 cores execution, varying the reusing
- * with 2, 4, 8 factor.
- *
  */
 void gemm_unroll(int * MatA, int * MatB, int* MatC, int NN, int MM, int KK){
 

@@ -20,26 +20,23 @@
 #ifndef __PULPNN_TEST_DATA_ALLOCATION__
 #define __PULPNN_TEST_DATA_ALLOCATION__
 
+// Layer dimensions, can be overridden from the command line:
+// make clean all run CH_IN=<value> CH_OUT=<value>
+#ifndef CH_IM_IN
 #define CH_IM_IN 1024
+#endif
+#ifndef CH_IM_OUT
 #define CH_IM_OUT 16
-#define DIM_KERNEL_X 3
-#define DIM_KERNEL_Y 3
-#define PADDING_Y_TOP 1
-#define PADDING_Y_BOTTOM 1
-#define PADDING_X_LEFT 1
-#define PADDING_X_RIGHT 1
-#define STRIDE_X 1
-#define STRIDE_Y 1
+#endif
 
 
-
-PI_L2 uint8_t IN_INT8_L2[CH_IM_IN] = IN_INT8;
-PI_L1 uint8_t IN_INT8_L1[CH_IM_IN];
-PI_L2 int8_t WEIGHT_INT8_L2[(CH_IM_IN * CH_IM_OUT)] = WEIGHT_INT8;
-PI_L1 int8_t WEIGHT_INT8_L1[(CH_IM_IN * CH_IM_OUT)];
-PI_L2 int32_t OUT_L2[CH_IM_OUT] = OUT_INT32;
+// Inputs and weights are generated at runtime, the reference output is
+// computed on the cluster with a plain (non-SIMD) dot-product
+PI_L1 uint8_t IN_INT8_L1[CH_IM_IN] __attribute__((aligned(4)));
+PI_L1 int8_t WEIGHT_INT8_L1[(CH_IM_IN * CH_IM_OUT)] __attribute__((aligned(4)));
 PI_L1 int32_t OUT_L1[CH_IM_OUT];
-PI_L1 int8_t BIAS_L1[CH_IM_OUT] = {0};
+PI_L1 int32_t PARTIAL_L1[NUM_CORES * CH_IM_OUT];
+PI_L2 int32_t OUT_REF_L2[CH_IM_OUT];
 
 
 #endif
